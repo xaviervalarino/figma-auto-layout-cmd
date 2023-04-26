@@ -1,0 +1,19 @@
+{
+  "name": "Auto Layout Command",
+  "id": "1232574808931501807",
+  "api": "1.0.0",
+  "main": "code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"],
+  "menu": [
+    {
+      "name": "Cycle Width Sizing",
+      "command": "width"
+    },
+    {
+      "name": "Cycle Height Sizing",
+      "command": "height"
+    }
+  ]
+}

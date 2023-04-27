@@ -95,6 +95,7 @@ function resizeWidth(
   } else if (axis === "VERTICAL") {
     _resizeCounterAxis(node, mode, axis);
   } else {
+    _resizePrimaryAxis(node, mode, axis);
   }
 }
 
@@ -108,6 +109,7 @@ function resizeHeight(
   } else if (axis === "VERTICAL") {
     _resizePrimaryAxis(node, mode, axis);
   } else {
+    _resizePrimaryAxis(node, mode, axis);
   }
 }
 

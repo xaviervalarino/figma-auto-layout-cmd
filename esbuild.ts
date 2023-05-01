@@ -10,6 +10,9 @@ const config = {
   if (process.argv[2] === "--watch") {
     const ctx = await esbuild.context({
       ...config,
+      color: true,
+      sourcemap: true,
+      logLevel: 'info',
       plugins: [
         {
           name: "Log Build Start",

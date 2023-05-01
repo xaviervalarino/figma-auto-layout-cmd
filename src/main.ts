@@ -48,16 +48,29 @@ figma.on("run", ({ command }) => {
     }
 
     console.log(mode, nextMode);
-    for (const LayoutNode of selection) {
-      logLayout(LayoutNode.node);
-      if (LayoutNode instanceof BaseLayoutSizer && nextMode === "hug") {
-        LayoutNode[command] = "fixed";
+    const modesSet = { fixed: 0, fill: 0, hug: 0 };
+    for (const layoutNode of selection) {
+      logLayout(layoutNode.node);
+      if (layoutNode instanceof BaseLayoutSizer && nextMode === "hug") {
+        layoutNode[command] = "fixed";
+        modesSet.fixed += 1;
+      } else if (layoutNode instanceof AutoLayoutSizer && nextMode === "fixed") {
+        layoutNode[command] = "fill";
+        modesSet.fill += 1;
       } else {
-        LayoutNode[command] = nextMode;
+        layoutNode[command] = nextMode;
+        modesSet[nextMode] += 1;
       }
     }
 
-    const msg = `${capitalize(command)}: ${capitalize(nextMode)}`;
-    figma.closePlugin(msg);
+    const outcome = Object.entries(modesSet)
+      .map(([k, v]: [string, number]) => {
+        if (!v) return;
+        return v + " " + capitalize(k);
+      })
+      .join(" ");
+    const direction = command === "horizontal" ? "Width" : "Height";
+    console.log(nextMode);
+    figma.closePlugin(`${direction}: ${outcome}`);
   }
 });

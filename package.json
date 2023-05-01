@@ -4,13 +4,15 @@
   "description": "Auto Layout Command",
   "main": "code.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "watch": "npm run build -- --watch"
+    "build": "ts-node esbuild.ts",
+    "watch": "ts-node esbuild.ts --watch"
   },
   "author": "",
   "license": "",
   "devDependencies": {
     "@figma/plugin-typings": "*",
+    "esbuild": "^0.17.18",
+    "ts-node": "^10.9.1",
     "typescript": "*"
   }
 }

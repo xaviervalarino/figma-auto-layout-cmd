@@ -1,4 +1,4 @@
-import AutoLayoutSizing from "./AutoLayoutSizing";
+import { BaseLayoutSizer, AutoLayoutSizer } from "./AutoLayoutSizing";
 
 function capitalize(str: string) {
   return str.slice(0, 1).toUpperCase() + str.slice(1);
@@ -16,16 +16,20 @@ counterAxisSizingMode: ${node.counterAxisSizingMode}
 
 console.clear();
 
-// figma.on("run", async ({ command }) => {
 figma.on("run", ({ command }) => {
-  if (command === "width" || command === "height") {
-    const selection: AutoLayoutSizing[] = [];
-    const modes: LayoutMode[] = ["hug", "fill", "fixed"];
+  if (command === "horizontal" || command === "vertical") {
+    const selection: LayoutSizer[] = [];
+    const modes: LayoutMode[] = ["fixed", "fill", "hug"];
     const modeCounts = { hug: 0, fill: 0, fixed: 0 };
 
     for (const node of figma.currentPage.selection) {
       if (node.parent && "layoutMode" in node.parent) {
-        const layoutNode = new AutoLayoutSizing(<LayoutChild>node);
+        let layoutNode: LayoutSizer;
+        if ("layoutMode" in node) {
+          layoutNode = new AutoLayoutSizer(node);
+        } else {
+          layoutNode = new BaseLayoutSizer(node);
+        }
         modeCounts[layoutNode[command]] += 1;
         selection.push(layoutNode);
       }
@@ -43,9 +47,14 @@ figma.on("run", ({ command }) => {
       nextMode = modes[i + 1];
     }
 
+    console.log(mode, nextMode);
     for (const LayoutNode of selection) {
-      logLayout(LayoutNode.node.node);
-      LayoutNode[command] = nextMode;
+      logLayout(LayoutNode.node);
+      if (LayoutNode instanceof BaseLayoutSizer && nextMode === "hug") {
+        LayoutNode[command] = "fixed";
+      } else {
+        LayoutNode[command] = nextMode;
+      }
     }
 
     const msg = `${capitalize(command)}: ${capitalize(nextMode)}`;

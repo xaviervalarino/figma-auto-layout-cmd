@@ -9,11 +9,11 @@
   "menu": [
     {
       "name": "Cycle Width Sizing",
-      "command": "width"
+      "command": "horizontal"
     },
     {
       "name": "Cycle Height Sizing",
-      "command": "height"
+      "command": "vertical"
     }
   ]
 }

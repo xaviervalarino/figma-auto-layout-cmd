@@ -1,21 +1,31 @@
 type LayoutMode = "fill" | "hug" | "fixed";
+type Dimension = "HORIZONTAL" | "VERTICAL";
 
-type LayoutChild = (
-  | BooleanOperationNode
-  | ComponentNode
-  | ComponentSetNode
-  | EllipseNode
-  | FrameNode
-  | GroupNode
-  | HighlightNode
-  | InstanceNode
-  | LineNode
-  | PolygonNode
-  | RectangleNode
-  | SliceNode
-  | StampNode
-  | StarNode
-  | TextNode
-  | VectorNode
-  | WashiTapeNode
-) & { parent: FrameNode | ComponentNode | InstanceNode };
+interface LayoutSizer {
+  node: LayoutChild;
+  horizontal: LayoutMode;
+  vertical: LayoutMode;
+}
+
+type AutoLayoutNode = ComponentNode | ComponentSetNode | FrameNode | InstanceNode;
+type AutoLayoutChild = AutoLayoutNode & { parent: AutoLayoutNode };
+
+type TextFrameChild = TextNode & { parent: AutoLayoutNode };
+
+type LayoutChild =
+  | AutoLayoutChild
+  | TextFrameChild
+  | ((
+      | BooleanOperationNode
+      | EllipseNode
+      | GroupNode
+      | HighlightNode
+      | LineNode
+      | PolygonNode
+      | RectangleNode
+      | SliceNode
+      | StampNode
+      | StarNode
+      | VectorNode
+      | WashiTapeNode
+    ) & { parent: AutoLayoutNode });

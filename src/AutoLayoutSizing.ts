@@ -1,10 +1,69 @@
-type AutoLayoutChild = LayoutChild extends infer U ? (U extends BaseFrameMixin ? U : never) : never;
+export class BaseLayoutSizer implements LayoutSizer {
+  node;
+  #width;
+  #height;
+  constructor(node: LayoutChild) {
+    this.node = node;
+    const prevWidth = node.getPluginData("width");
+    const prevHeight = node.getPluginData("height");
+    if (this.horizontal === "fixed" || !prevWidth.length) {
+      node.setPluginData("width", node.width.toString());
+      this.#width = node.width;
+    } else {
+      this.#width = +prevWidth;
+    }
+    if (this.vertical === "fixed" || !prevHeight.length) {
+      node.setPluginData("height", node.height.toString());
+      this.#height = node.height;
+    } else {
+      this.#height = +prevHeight;
+    }
+  }
 
-class AutoLayoutNode {
+  get horizontal() {
+    if (this.node.parent.layoutMode === "HORIZONTAL") {
+      return this.node.layoutGrow ? "fill" : "fixed";
+    } else {
+      return this.node.layoutAlign === "STRETCH" ? "fill" : "fixed";
+    }
+  }
+
+  get vertical() {
+    if (this.node.parent.layoutMode === "VERTICAL") {
+      return this.node.layoutGrow ? "fill" : "fixed";
+    } else {
+      return this.node.layoutAlign === "STRETCH" ? "fill" : "fixed";
+    }
+  }
+
+  set horizontal(mode: LayoutMode) {
+    if (this.node.parent.layoutMode === "HORIZONTAL") {
+      this.node.layoutGrow = mode === "fill" ? 1 : 0;
+    } else {
+      this.node.layoutAlign = mode === "fill" ? "STRETCH" : "INHERIT";
+    }
+    if (mode === "fixed") {
+      this.node.resize(this.#width, this.node.height);
+    }
+  }
+
+  set vertical(mode: LayoutMode) {
+    if (this.node.parent.layoutMode === "VERTICAL") {
+      this.node.layoutGrow = mode === "fill" ? 1 : 0;
+    } else {
+      this.node.layoutAlign = mode === "fill" ? "STRETCH" : "INHERIT";
+    }
+    if (mode === "fixed") {
+      this.node.resize(this.node.width, this.#height);
+    }
+  }
+}
+
+export class AutoLayoutSizer implements LayoutSizer {
   node: AutoLayoutChild;
+  // primary and counter axis as it relates to the parent node
   #primarySizingAxis: "primaryAxisSizingMode" | "counterAxisSizingMode";
   #counterSizingAxis: "primaryAxisSizingMode" | "counterAxisSizingMode";
-
   constructor(node: AutoLayoutChild) {
     this.node = node;
     const matchingLayout = node.layoutMode === node.parent.layoutMode;
@@ -46,36 +105,32 @@ class AutoLayoutNode {
     this.node[childSizingAxis] = mode === "hug" ? "AUTO" : "FIXED";
   }
 
-  #getDimension(dimension: "HORIZONTAL" | "VERTICAL") {
-    return this.node.parent.layoutMode === dimension
+  get horizontal() {
+    return this.node.parent.layoutMode === "HORIZONTAL"
       ? this.#primaryAxisMode
       : this.#counterAxisMode;
   }
 
-  #setDimension(dimension: "HORIZONTAL" | "VERTICAL", mode: LayoutMode) {
-    if (this.node.parent.layoutMode === dimension) {
+  get vertical() {
+    return this.node.parent.layoutMode === "VERTICAL"
+      ? this.#primaryAxisMode
+      : this.#counterAxisMode;
+  }
+
+  set horizontal(mode: LayoutMode) {
+    if (this.node.parent.layoutMode === "HORIZONTAL") {
       this.#primaryAxisMode = mode;
     } else {
       this.#counterAxisMode = mode;
     }
   }
-
-  get width() {
-    return this.#getDimension("HORIZONTAL");
+  set vertical(mode: LayoutMode) {
+    if (this.node.parent.layoutMode === "VERTICAL") {
+      this.#primaryAxisMode = mode;
+    } else {
+      this.#counterAxisMode = mode;
+    }
   }
-
-  set width(mode: LayoutMode) {
-    this.#setDimension("HORIZONTAL", mode);
-  }
-
-  get height() {
-    return this.#getDimension("VERTICAL");
-  }
-
-  set height(mode: LayoutMode) {
-    this.#setDimension("VERTICAL", mode);
-  }
-
 }
 
 type TextFrameChild = Extract<LayoutChild, TextNode>;
@@ -129,59 +184,5 @@ class TextFrameNode {
 
   set height(mode: LayoutMode) {
     console.log("unimplemented");
-  }
-}
-
-type EverythingElseChild = Exclude<LayoutChild, TextFrameChild | AutoLayoutChild>;
-
-class EverythingElseNode {
-  node: EverythingElseChild;
-  constructor(node: EverythingElseChild) {
-    this.node = node;
-  }
-
-  get width() {
-    return "unimplemented";
-  }
-
-  set width(mode: LayoutMode) {
-    console.log("unimplemented");
-  }
-
-  get height() {
-    return "unimplemented";
-  }
-
-  set height(mode: LayoutMode) {
-    console.log("unimplemented");
-  }
-}
-
-export default class AutoLayoutSizing {
-  node: AutoLayoutNode | TextFrameNode | EverythingElseNode;
-  constructor(node: LayoutChild) {
-    if ("layoutMode" in node) {
-      this.node = new AutoLayoutNode(node);
-    } else if (node.type === "TEXT") {
-      this.node = new TextFrameNode(node);
-    } else {
-      this.node = new EverythingElseNode(node);
-    }
-  }
-
-  get width() {
-    return <"hug" | "fill" | "fixed">this.node.width;
-  }
-
-  set width(mode: LayoutMode) {
-    this.node.width = mode;
-  }
-
-  get height() {
-    return <"hug" | "fill" | "fixed">this.node.height;
-  }
-
-  set height(mode: LayoutMode) {
-    this.node.height = mode;
   }
 }

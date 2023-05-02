@@ -1,6 +1,6 @@
 {
   "name": "figma-auto-layouts-cmd",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Auto Layout Command",
   "main": "code.js",
   "scripts": {

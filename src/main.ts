@@ -2,7 +2,7 @@ import { BaseLayoutSizer, AutoLayoutSizer } from "./AutoLayoutSizing";
 import LayoutAligner from "./LayoutAlignment";
 
 function capitalize(str: string) {
-  return str.slice(0, 1).toUpperCase() + str.slice(1);
+  return str.slice(0, 1).toUpperCase() + str.slice(1).toLowerCase();
 }
 
 function logLayout(node: LayoutChild) {
@@ -119,5 +119,26 @@ figma.on("run", ({ command }) => {
       aligner.position = nextPosition;
     }
     figma.closePlugin(`Alignment set to ${nextPosition.join(" ")}`);
+  }
+
+  if (command === "direction") {
+    const selection: AutoLayoutNode[] = [];
+    const directionCounts = { HORIZONTAL: 0, VERTICAL: 0, NONE: 0 };
+    for (const node of figma.currentPage.selection) {
+      if ("layoutMode" in node) {
+        directionCounts[node.layoutMode] += 1;
+        selection.push(node);
+      }
+    }
+
+    const [currentDirection] = <["HORIZONTAL" | "VERTICAL" | "NONE", number]>(
+      Object.entries(directionCounts).sort((a, b) => b[1] - a[1])[0]
+    );
+    const nextDirection = currentDirection === "HORIZONTAL" ? "VERTICAL" : "HORIZONTAL";
+
+    for (const node of selection) {
+      node.layoutMode = nextDirection
+    }
+    figma.closePlugin(`${capitalize(nextDirection)} layout`)
   }
 });

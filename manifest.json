@@ -36,6 +36,10 @@
           "command": "right column"
         }
       ]
+    },
+    {
+      "name": "Cycle Layout Direction",
+      "command": "direction"
     }
   ]
 }

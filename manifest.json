@@ -8,12 +8,34 @@
   "editorType": ["figma"],
   "menu": [
     {
-      "name": "Cycle Width Sizing",
-      "command": "horizontal"
+      "name": "Cycle Sizing",
+      "menu": [
+        {
+          "name": "Cycle Width Sizing",
+          "command": "horizontal"
+        },
+        {
+          "name": "Cycle Height Sizing",
+          "command": "vertical"
+        }
+      ]
     },
     {
-      "name": "Cycle Height Sizing",
-      "command": "vertical"
+      "name": "Cycle Alignment",
+      "menu": [
+        {
+          "name": "Cycle Left Column",
+          "command": "left column"
+        },
+        {
+          "name": "Cycle Center Column",
+          "command": "center column"
+        },
+        {
+          "name": "Cycle Right Column",
+          "command": "right column"
+        }
+      ]
     }
   ]
 }

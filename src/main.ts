@@ -1,4 +1,5 @@
 import { BaseLayoutSizer, AutoLayoutSizer } from "./AutoLayoutSizing";
+import LayoutAligner from "./LayoutAlignment";
 
 function capitalize(str: string) {
   return str.slice(0, 1).toUpperCase() + str.slice(1);
@@ -72,5 +73,51 @@ figma.on("run", ({ command }) => {
     const direction = command === "horizontal" ? "Width" : "Height";
     console.log(nextMode);
     figma.closePlugin(`${direction}: ${outcome}`);
+  }
+
+  if (command.match("column$")) {
+    const parents = new Map<string, LayoutAligner>();
+    const rows: AlignmentPosition[1][] = ["top", "middle", "bottom"];
+    const nextColumn = <AlignmentPosition[0]>command.split(" ")[0];
+    const columnCounts = { left: 0, center: 0, right: 0 };
+    const rowCounts = { top: 0, middle: 0, bottom: 0 };
+
+    for (const node of figma.currentPage.selection) {
+      if ("layoutMode" in node && node.layoutMode !== "NONE") {
+        const aligner = new LayoutAligner(node);
+        columnCounts[aligner.position[0]] += 1
+        rowCounts[aligner.position[1]] += 1;
+        if (!parents.get(node.id)) parents.set(node.id, aligner);
+      }
+    }
+
+    const [currentColumn] = <[AlignmentPosition[0], number]>(
+      Object.entries(columnCounts).sort((a, b) => b[1] - a[1])[0]
+    );
+    const [currentRow] = <[AlignmentPosition[1], number]>(
+      Object.entries(rowCounts).sort((a, b) => b[1] - a[1])[0]
+    );
+
+    let nextPosition: AlignmentPosition;
+
+    console.log(currentColumn, nextColumn, currentColumn === nextColumn);
+    if (currentColumn !== nextColumn) {
+      nextPosition = [nextColumn, currentRow];
+      console.log('!==', nextPosition)
+    } else {
+      const i = rows.indexOf(currentRow);
+      if (i === rows.length - 1) {
+        nextPosition = [nextColumn, rows[0]];
+      } else {
+        nextPosition = [nextColumn, rows[i + 1]];
+      }
+      console.log('===', nextPosition)
+    }
+
+    for (const aligner of parents.values()) {
+      logLayout(aligner.node);
+      aligner.position = nextPosition;
+    }
+    figma.closePlugin(`Alignment set to ${nextPosition.join(" ")}`);
   }
 });

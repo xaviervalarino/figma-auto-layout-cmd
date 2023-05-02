@@ -29,3 +29,5 @@ type LayoutChild =
       | VectorNode
       | WashiTapeNode
     ) & { parent: AutoLayoutNode });
+
+type AlignmentPosition = [column: "left" | "center" | "right", row: "top" | "middle" | "bottom"];
